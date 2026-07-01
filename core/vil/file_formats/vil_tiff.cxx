@@ -356,8 +356,10 @@ vil_tiff_file_format::make_blocked_output_image(vil_stream * vs,
   // this constructor for h defines that the resource is to
   // be setup for writing
   auto * h = new vil_tiff_header(tss->tif, nx, ny, nplanes, format, size_block_i, size_block_j);
+
   if (!h->format_supported)
   {
+    std::cout << "FORMAT NOT SUPPORED " << nplanes << std::endl;
 #if HAS_GEOTIFF
     XTIFFClose(tss->tif);
 #else
@@ -1289,6 +1291,7 @@ vil_tiff_image::put_view(const vil_image_view_base & im, unsigned i0, unsigned j
     for (unsigned bj = bj_start; bj <= bj_end; ++bj)
       if (!this->put_block(bi, bj, i0, j0, im))
         return false;
+
   return true;
 }
 
@@ -1311,7 +1314,9 @@ vil_tiff_image::put_block(unsigned block_index_i, unsigned block_index_j, const 
 
   // write the block to the tiff file
   const bool good_write = write_block_to_file(block_index_i, block_index_j, bytes_per_block, block_buf);
+
   delete[] block_buf;
+
   return good_write;
 }
 
