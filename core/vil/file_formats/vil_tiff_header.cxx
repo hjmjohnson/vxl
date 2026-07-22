@@ -112,6 +112,7 @@ vil_tiff_header::read_header()
 #ifdef DEBUG
   std::cout << date_and_time() << '\n';
 #endif
+
   //====
   // Determine the endian state of the file and machine
   file_is_big_endian_ = TIFFIsByteSwapped(tif_) > 0;
@@ -248,7 +249,6 @@ vil_tiff_header::read_header()
     for (uint32_t i = 0; i < count; ++i)
       no_data_value_.push_back(data[i]);
   }
-
   return this->compute_pixel_format();
   // int success = TIFFReadDirectory(tif_);
 }
@@ -388,7 +388,6 @@ vil_tiff_header::compute_pixel_format()
     pix_fmt = VIL_PIXEL_FORMAT_UNKNOWN;
     return false;
   }
-
   const vxl_uint_16 b = bits_per_sample.val;
   const vxl_uint_16 bbs = bytes_per_sample();
   nplanes = 1;
@@ -563,6 +562,9 @@ vil_tiff_header::compute_pixel_format()
                   pix_fmt = VIL_PIXEL_FORMAT_RGBA_UINT_16;
                 return true;
               }
+              case 8:
+                nplanes = 8;
+                return true;
               default:
                 pix_fmt = VIL_PIXEL_FORMAT_UNKNOWN;
                 return false;
@@ -772,6 +774,9 @@ vil_tiff_header::set_header(unsigned ni,
     case 4:
       photometric.val = 2;
       break;
+    case 8:
+      photometric.val = 2;
+      break;
     default:
       return false;
   }
@@ -821,7 +826,7 @@ vil_tiff_header::vil_tiff_header(TIFF * tif,
   , format_supported(this->set_header(ni, nj, nplanes, fmt, size_block_i, size_block_j))
 {
 
-
+  
   if (!format_supported)
     return;
   write_short_tag(tif_, TIFFTAG_PHOTOMETRIC, photometric);
